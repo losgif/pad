@@ -1,0 +1,29 @@
+name: Deploy to GitHub Pages
+on:
+  push:
+    branches:
+      - master # 推送此分支触发部署流程
+
+jobs:
+  deploy:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    steps:
+    # 检出代码
+    - uses: actions/checkout@master
+
+    # 设置 Nodejs
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+    - run: yarn
+    - run: yarn build
+
+    # 部署静态页面
+    - name: Deploy
+      uses: s0/git-publish-subdir-action@develop
+      env:
+        REPO: self
+        BRANCH: gh-pages # Github Pages 部署分支
+        FOLDER: public/
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

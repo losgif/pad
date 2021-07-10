@@ -7,11 +7,15 @@ module.exports = {
   tagline: '个人技术备忘录',
   url: 'https://losgif.com',
   baseUrl: '/',
-  onBrokenLinks: 'throw',
+  onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
   organizationName: 'losgif', // Usually your GitHub org/user name.
   projectName: 'pad', // Usually your repo name.
+  i18n: {
+    defaultLocale: 'zh',
+    locales: ['en', 'zh']
+  },
   themeConfig: {
     navbar: {
       title: 'LOSGIF',
@@ -31,7 +35,7 @@ module.exports = {
           href: 'https://github.com/losgif',
           label: 'GitHub',
           position: 'right',
-        },
+        }
       ],
     },
     footer: {

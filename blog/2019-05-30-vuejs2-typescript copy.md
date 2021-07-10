@@ -117,8 +117,6 @@ new Vue({
 })
 ```
 
-具体使用请参考文章 [Vue Class 组件搭配 TSX 食用](/2021/04/24/vue-class-component)
-
 ## 组件定义方式
 
 ### Vue2 + JS
@@ -151,7 +149,11 @@ export default defineComponent({
 ### Vue2 + TS
 #### 方法一: 使用 Vue.extend 定义
 基本兼容Vue2对象定义写法  
-注意 `$ref` 不兼容
+
+:::danger  
+注意 `$ref` 不兼容  
+:::  
+
 ```ts
 import { Vue } from 'vue-property-decorator'
 
@@ -172,7 +174,7 @@ export default Vue.component({
 
 #### 方法三
 出现了，React "邪教" 成员
-```vue
+```tsx
 <template>
   <div>
     ...
