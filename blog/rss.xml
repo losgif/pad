@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+    <channel>
+        <title>LOSGIF Blog</title>
+        <link>https://losgif.com/blog</link>
+        <description>LOSGIF Blog</description>
+        <lastBuildDate>Mon, 20 Apr 2020 00:00:00 GMT</lastBuildDate>
+        <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
+        <generator>https://github.com/jpmonette/feed</generator>
+        <item>
+            <title><![CDATA[JavaScript 中的防抖和节流]]></title>
+            <link>https://losgif.com/blog/debounce-and-throttle.html</link>
+            <guid>debounce-and-throttle.html</guid>
+            <pubDate>Mon, 20 Apr 2020 00:00:00 GMT</pubDate>
+            <description><![CDATA[使用场景]]></description>
+        </item>
+        <item>
+            <title><![CDATA[Vue 2 升级 TypeScript 简单食用方式]]></title>
+            <link>https://losgif.com/blog/vuejs2-typescript.html</link>
+            <guid>vuejs2-typescript.html</guid>
+            <pubDate>Thu, 30 May 2019 00:00:00 GMT</pubDate>
+            <description><![CDATA[为什么？]]></description>
+        </item>
+        <item>
+            <title><![CDATA[GitHub Actions 及 GitHub Pages 简单搭配]]></title>
+            <link>https://losgif.com/blog/github-action.html</link>
+            <guid>github-action.html</guid>
+            <pubDate>Wed, 29 May 2019 00:00:00 GMT</pubDate>
+            <description><![CDATA[优势]]></description>
+        </item>
+        <item>
+            <title><![CDATA[async / await 使用注意]]></title>
+            <link>https://losgif.com/blog/async-await.html</link>
+            <guid>async-await.html</guid>
+            <pubDate>Tue, 28 May 2019 00:00:00 GMT</pubDate>
+            <description><![CDATA[js 中的 async / await 有何作用？]]></description>
+        </item>
+    </channel>
+</rss>

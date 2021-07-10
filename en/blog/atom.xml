@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://losgif.com/en/blog</id>
+    <title>LOSGIF Blog</title>
+    <updated>2020-04-20T00:00:00.000Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://losgif.com/en/blog"/>
+    <subtitle>LOSGIF Blog</subtitle>
+    <icon>https://losgif.com/en/img/favicon.ico</icon>
+    <entry>
+        <title type="html"><![CDATA[JavaScript 中的防抖和节流]]></title>
+        <id>debounce-and-throttle.html</id>
+        <link href="https://losgif.com/en/blog/debounce-and-throttle.html"/>
+        <updated>2020-04-20T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[使用场景]]></summary>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Vue 2 升级 TypeScript 简单食用方式]]></title>
+        <id>vuejs2-typescript.html</id>
+        <link href="https://losgif.com/en/blog/vuejs2-typescript.html"/>
+        <updated>2019-05-30T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[为什么？]]></summary>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[GitHub Actions 及 GitHub Pages 简单搭配]]></title>
+        <id>github-action.html</id>
+        <link href="https://losgif.com/en/blog/github-action.html"/>
+        <updated>2019-05-29T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[优势]]></summary>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[async / await 使用注意]]></title>
+        <id>async-await.html</id>
+        <link href="https://losgif.com/en/blog/async-await.html"/>
+        <updated>2019-05-28T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[js 中的 async / await 有何作用？]]></summary>
+    </entry>
+</feed>
