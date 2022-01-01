@@ -1,1 +1,0 @@
-(self.webpackChunkblog_web=self.webpackChunkblog_web||[]).push([[606],{4040:function(a){"use strict";a.exports=JSON.parse('{"allTagsPath":"/blog/tags","slug":"async-await","name":"async/await","count":1,"permalink":"/blog/tags/async-await"}')}}]);

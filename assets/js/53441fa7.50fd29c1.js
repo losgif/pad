@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkblog_web=self.webpackChunkblog_web||[]).push([[6606],{5774:function(a){a.exports=JSON.parse('{"allTagsPath":"/blog/tags","slug":"/blog/tags/async-await","name":"async/await","count":1,"permalink":"/blog/tags/async-await"}')}}]);

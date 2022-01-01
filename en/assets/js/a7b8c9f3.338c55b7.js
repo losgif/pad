@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkblog_web=self.webpackChunkblog_web||[]).push([[7428],{4170:function(e){e.exports=JSON.parse('{"allTagsPath":"/en/blog/tags","slug":"/en/blog/tags/ci-cd","name":"CI CD","count":1,"permalink":"/en/blog/tags/ci-cd"}')}}]);

@@ -1,18 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0">
+<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/">
     <channel>
         <title>LOSGIF Blog</title>
         <link>https://losgif.com/blog</link>
         <description>LOSGIF Blog</description>
-        <lastBuildDate>Mon, 20 Apr 2020 00:00:00 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 01 Jan 2021 00:00:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
+        <item>
+            <title><![CDATA[通过Gitlab CI构建Docker镜像]]></title>
+            <link>https://losgif.com/blog/build-docker-image-in-docker-with-gitlab-ci.html</link>
+            <guid>build-docker-image-in-docker-with-gitlab-ci.html</guid>
+            <pubDate>Fri, 01 Jan 2021 00:00:00 GMT</pubDate>
+            <description><![CDATA[前情提要]]></description>
+            <content:encoded><![CDATA[<h2>前情提要</h2><p>Gitlab CI 环境一般有：docker, shell。本文讨论在docker运行环境中如何再次构建Docker镜像。<br/>
+<!-- -->有点先有鸡还是先有蛋的意思，所以docker的解决方案是<code>dind</code>。</p><blockquote><p><code>dind</code> 指的是 Docker in Docker，一种在docker容器内使用docker的方法</p></blockquote><h2>构建</h2><p>首先看下文件结构</p><pre><code class="language-shell">$ tree     
+.
+├── .gitlab-ci.yml
+└── Dockerfile
+
+0 directories, 3 files
+
+</code></pre><h3>Dockerfile</h3><p>不必多说，docker构建镜像必备文件</p><h3>.gitlab-ci.yml</h3><p>gitlab ci 配置文件</p><p>直接看下配置文件</p><pre><code class="language-dockerfile"># This file is a template, and might need editing before it works on your project.
+build:
+  tags:
+    - docker-ci-runner
+  # Official docker image.
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u &quot;$CI_REGISTRY_USER&quot; -p &quot;$CI_REGISTRY_PASSWORD&quot; $CI_REGISTRY
+  script:
+    - docker build --tag &quot;$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG&quot; .
+    - docker push &quot;$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG&quot;
+  only:
+    # 仅运行在添加标签时
+    - tags
+
+</code></pre><p>前置知识需要了解 .gitlab-ci.yml 配置<br/>
+<!-- -->文档可以查看<a href="https://docs.gitlab.com/ee/ci/yaml/index.html">这里</a><br/>
+<!-- -->内容很简单，声明image、tags、script、only、services<br/>
+<!-- -->主要关注services内声明使用了docker:dind，借此可以完成docker容器 内构建docker 镜像。</p><pre><code class="language-shell">docker build --tag &quot;$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG&quot; .
+</code></pre><p>此命令完成了构建镜像任务，且使用git标签名作为镜像标签。</p><h2>推送</h2><pre><code class="language-shell">docker push &quot;$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG&quot;
+</code></pre><p>Gitlab CE版本也是支持docker镜像库的，上面的配置可以完成推送至镜像库。<br/>
+<!-- -->至此完成了镜像构建和推送。</p>]]></content:encoded>
+        </item>
         <item>
             <title><![CDATA[JavaScript 中的防抖和节流]]></title>
             <link>https://losgif.com/blog/debounce-and-throttle.html</link>
             <guid>debounce-and-throttle.html</guid>
             <pubDate>Mon, 20 Apr 2020 00:00:00 GMT</pubDate>
             <description><![CDATA[使用场景]]></description>
+            <content:encoded><![CDATA[<h2>使用场景</h2><p>在进行窗口的resize、scroll，输入框内容校验等操作时，如果事件处理函数调用的频率无限制，会加重浏览器的负担，导致用户体验非常糟糕。<br/>
+<!-- -->此时我们可以采用debounce（防抖）和throttle（节流）的方式来减少调用频率，同时又不影响实际效果。</p><h2>名词解释</h2><h3>防抖函数</h3><p>防抖（debounce）：当持续触发事件时，一定时间段内没有再触发事件，<br/>
+<!-- -->事件处理函数才会执行一次，如果设定的时间到来之前，又一次触发了事件，就重新开始延时。<br/>
+<!-- -->如下图，持续触发scroll事件时，并不执行handle函数，当1000毫秒内没有触发scroll事件时，才会延时触发scroll事件。</p><p><img src="https://res-static.hc-cdn.cn/fms/img/6862e0a0a403e16445761f89e2966fb71603448561229" alt="debounce.png"/></p><h3>节流函数</h3><p>节流（throttle）：当持续触发事件时，保证一定时间段内只调用一次事件处理函数。<br/>
+<!-- -->节流通俗解释就比如我们水龙头放水，阀门一打开，水哗哗的往下流，秉着勤俭节约的优良传统美德，我们要把水龙头关小点，最好是如我们心意按照一定规律在某个时间间隔内一滴一滴的往下滴。<br/>
+<!-- -->如下图，持续触发scroll事件时，并不立即执行handle函数，每隔1000毫秒才会执行一次handle函数。
+<img src="https://res-static.hc-cdn.cn/fms/img/3d0c29700d9a89ef7d33a2d7ac2e9fb31603448561230" alt="throttle.png"/></p><h2>代码实现</h2><h3>防抖：</h3><pre><code class="language-ts">// 防抖
+function debounce (fn: Function, wait) {
+  var timeout = null;
+  return function () {
+    if (timeout !== null) {
+      clearTimeout(timeout);
+    }
+
+    timeout = setTimeout(fn, wait);
+  }
+}
+
+// 处理函数
+function handle () {
+  console.log(Math.random());
+}
+
+// 滚动事件
+window.addEventListener(&#x27;scroll&#x27;, debounce(handle, 1000));
+</code></pre><p>当持续触发scroll事件时，事件处理函数handle只在停止滚动1000毫秒之后才会调用一次。<br/>
+<!-- -->也就是说在持续触发scroll事件的过程中，事件处理函数handle一直没有执行。</p><h3>节流</h3><pre><code class="language-ts">var throttle = function (func, delay) {
+  var timer = null;
+  return function () {
+    var context = this;
+    var args = arguments;
+
+    if (!timer) {
+      timer = setTimeout(function () {
+        func.call(context, args);
+        timer = null;
+      }, delay);
+    }
+  }
+}
+
+function handle () {
+  console.log(Math.random());
+}
+
+window.addEventListener(&#x27;scroll&#x27;, throttle(handle, 1000));
+</code></pre><p>当触发事件的时候，我们设置一个定时器，再次触发事件的时候，如果定时器存在，就不执行，直到delay时间后，定时器执行执行函数，并且清空定时器，这样就可以设置下个定时器。当第一次触发事件时，不会立即执行函数，而是在delay秒后才执行。而后再怎么频繁触发事件，也都是每delay时间才执行一次。当最后一次停止触发后，由于定时器的delay延迟，可能还会执行一次函数。</p><h2>总结</h2><h3>防抖：</h3><p>将几次操作合并为一此操作进行。原理是维护一个计时器，规定在delay时间后触发函数，但是在delay时间内再次触发的话，就会取消之前的计时器而重新设置。这样一来，只有最后一次操作能被触发。</p><h3>节流：</h3><p>使得一定时间内只触发一次函数。原理是通过判断是否到达一定时间来触发函数。</p><h3>区别：</h3><p>函数节流不管事件触发有多频繁，都会保证在规定时间内一定会执行一次真正的事件处理函数，而函数防抖只是在最后一次事件后才触发一次函数。 比如在页面的无限加载场景下，我们需要用户在滚动页面时，每隔一段时间发一次 Ajax 请求，而不是在用户停下滚动页面操作时才去请求数据。这样的场景，就适合用节流技术来实现。</p><h2>参考</h2><p><a href="https://www.lodashjs.com/docs/lodash.debounce">https://www.lodashjs.com/docs/lodash.debounce</a>
+<a href="https://www.huaweicloud.com/articles/d3842d8455d26db6868c19c7daced54b.html">https://www.huaweicloud.com/articles/d3842d8455d26db6868c19c7daced54b.html</a>
+<a href="https://dev.to/heymarkkop/debounce-x-throttle-23k5">https://dev.to/heymarkkop/debounce-x-throttle-23k5</a></p>]]></content:encoded>
         </item>
         <item>
             <title><![CDATA[Vue 2 升级 TypeScript 简单食用方式]]></title>
@@ -20,6 +108,125 @@
             <guid>vuejs2-typescript.html</guid>
             <pubDate>Thu, 30 May 2019 00:00:00 GMT</pubDate>
             <description><![CDATA[为什么？]]></description>
+            <content:encoded><![CDATA[<h2>为什么？</h2><p>引言：
+<del>Vue 3 都拥抱 TypeScript 了，你说呢？<!-- -->[<!-- -->狗头]</del></p><p>随着应用的增长，静态类型系统可以帮助防止许多潜在的运行时错误，这就是为什么 Vue 3 是用 TypeScript 编写的。这意味着在 Vue 中使用 TypeScript 不需要任何其他工具——它具有一流的公民支持。</p><h2>如何操作</h2><p>Vue 3 使用 TypeScript 很简单，CLI 创建项目时选取下即可<br/>
+<!-- -->已有Vue2项目不配吗?<br/>
+<!-- -->当然不是，Vue 官方通过 ts 的 d.ts 文件申明了Vue 2的静态类型<br/>
+<!-- -->也实现了Vue 2使用 TypeScript 的愿望</p><h3>添加 TypeScript 支持</h3><h4>安装 NPM 包</h4><pre><code class="language-shell">npm install -D typescript
+</code></pre><h4>配置 typconfig.json 文件</h4><pre><code class="language-json">// tsconfig.json
+{
+  &quot;compilerOptions&quot;: {
+    // 与 Vue 的浏览器支持保持一致
+    &quot;target&quot;: &quot;es5&quot;,
+    // 这可以对 `this` 上的数据 property 进行更严格的推断
+    &quot;strict&quot;: true,
+    // 如果使用 webpack 2+ 或 rollup，可以利用 tree-shake:
+    &quot;module&quot;: &quot;es2015&quot;,
+    &quot;moduleResolution&quot;: &quot;node&quot;
+  }
+}
+</code></pre><p>安装工作到此已经完成</p><h3>基本用法</h3><p>之前直接使用对象定义组件的方式行不通了<br/>
+<!-- -->要让 TypeScript 正确推断 Vue 组件选项中的类型<br/>
+<!-- -->您需要使用 Vue.component 或 Vue.extend 定义组件  </p><pre><code class="language-ts">import Vue from &#x27;vue&#x27;
+const RightComponent = Vue.extend({
+  // 类型推断已启用
+})
+
+const ErrorComponent = {
+  // 这里不会有类型推断，
+  // 因为 TypeScript 不能确认这是 Vue 组件的选项
+}
+</code></pre><h3>高级用法</h3><p>请参见 <a href="https://cn.vuejs.org/v2/guide/typescript.html#%E5%A2%9E%E5%BC%BA%E7%B1%BB%E5%9E%8B%E4%BB%A5%E9%85%8D%E5%90%88%E6%8F%92%E4%BB%B6%E4%BD%BF%E7%94%A8">VueJS 官方文档</a></p><h3>基于类的 Vue 组件</h3><p>如果你说我不喜欢 <code>Vue.extend</code> 或 <code>Vue.component</code> 定义出来的组件，想使用 Class 定义<br/>
+<!-- -->也是可以的</p><p>可以使用官方维护的 <a href="https://github.com/vuejs/vue-class-component">vue-class-component</a> 装饰器:</p><pre><code class="language-ts">import Vue from &#x27;vue&#x27;
+import Component from &#x27;vue-class-component&#x27;
+
+// @Component 修饰符注明了此类为一个 Vue 组件
+@Component({
+  // 所有的组件选项都可以放在这里
+  template: &#x27;&lt;button @click=&quot;onClick&quot;&gt;Click!&lt;/button&gt;&#x27;
+})
+export default class MyComponent extends Vue {
+  // 初始数据可以直接声明为实例的 property
+  message: string = &#x27;Hello!&#x27;
+
+  // 组件方法也可以直接声明为实例的方法
+  onClick (): void {
+    window.alert(this.message)
+  }
+}
+</code></pre><h4>与 TSX 搭配使用</h4><p>既然都用上了 Class 组件，干脆再 &quot;React&quot; 点，来人，上 <code>TSX</code></p><pre><code class="language-tsx">import AnchoredHeading from &#x27;./AnchoredHeading.vue&#x27;
+
+new Vue({
+  el: &#x27;#demo&#x27;,
+  render: function (h) {
+    return (
+      &lt;AnchoredHeading level={1}&gt;
+        &lt;span&gt;Hello&lt;/span&gt; world!
+      &lt;/AnchoredHeading&gt;
+    )
+  }
+})
+</code></pre><h2>组件定义方式</h2><h3>Vue2 + JS</h3><h4>方法一：使用对象定义</h4><pre><code class="language-js">export default {
+  // type inference disabled
+}
+</code></pre><h4>方法二：使用 Composition API 方式定义</h4><p>此方式可以大部分兼容 Vue3 写法，升级Vue3时只需要修改导入即可</p><pre><code class="language-js">import { defineComponent } from &#x27;@vue/composition-api&#x27;
+
+export default defineComponent({
+  // type inference disabled
+})
+</code></pre><h3>Vue3 + JS</h3><p>与 Vue2 + JS 方法二 基本一致，导入差异罢了</p><pre><code class="language-ts">import { defineComponent } from &#x27;vue&#x27;
+
+export default defineComponent({
+  // type inference disabled
+})
+</code></pre><h3>Vue2 + TS</h3><h4>方法一: 使用 Vue.extend 定义</h4><p>基本兼容Vue2对象定义写法  </p><p>:::danger<br/>
+<!-- -->注意 <code>$ref</code> 不兼容<br/>
+<!-- -->:::  </p><pre><code class="language-ts">import { Vue } from &#x27;vue-property-decorator&#x27;
+
+export default Vue.extend({
+  // type inference enabled
+})
+</code></pre><h4>方法二：使用 Vue.component 定义</h4><p>同上</p><pre><code class="language-ts">import { Vue } from &#x27;vue-property-decorator&#x27;
+
+export default Vue.component({
+  // type inference enabled
+})
+</code></pre><h4>方法三</h4><p>出现了，React &quot;邪教&quot; 成员</p><pre><code class="language-tsx">&lt;template&gt;
+  &lt;div&gt;
+    ...
+  &lt;/div&gt;
+&lt;/template&gt;
+&lt;script lang=&quot;ts&quot;&gt;
+import { Vue, Component } from &#x27;vue-property-decorator&#x27;
+
+@Component
+export default class App extends Vue ({
+  // type inference enabled
+})
+&lt;/script&gt;
+</code></pre><h4>方法四</h4><p>浓厚味道的 React 写法</p><pre><code class="language-tsx">import { Vue, Component } from &#x27;vue-property-decorator&#x27;
+
+@Component
+export default class App extends Vue ({
+  @Prop({
+    type: String,
+    required: true
+  }) readonly msg!: string
+  
+  render () {
+    return (
+      &lt;div&gt;
+        &lt;div&gt;
+          { this.msg }
+        &lt;/div&gt;
+        &lt;input type=&quot;text&quot; v-model={this.msg}/&gt;
+      &lt;/div&gt;
+    )
+  }
+})
+</code></pre><h2>参考文献</h2><p><a href="https://cn.vuejs.org/v2/guide/">Vue.js 官方文档</a><br/>
+<a href="https://class-component.vuejs.org/">Vue Class Component 官方文档</a><br/>
+<a href="https://github.com/vuejs/composition-api">Vue Composition Api 官方文档</a></p>]]></content:encoded>
         </item>
         <item>
             <title><![CDATA[GitHub Actions 及 GitHub Pages 简单搭配]]></title>
@@ -27,6 +234,42 @@
             <guid>github-action.html</guid>
             <pubDate>Wed, 29 May 2019 00:00:00 GMT</pubDate>
             <description><![CDATA[优势]]></description>
+            <content:encoded><![CDATA[<h2>优势</h2><p>可以在一个仓库或者多个仓库里保存源码及构建后的静态文件产物
+全程自动化部署，无需人工干预
+GitHub 代码托管，保证代码安全无虞</p><h2>GitHub Actions 是什么？</h2><p>GitHub Actions 是由 GitHub 推出的包含 CI、CD、构建、测试及部署的自动化工作流</p><p>官方介绍为：</p><p>GitHub Actions makes it easy to automate all your software workflows, now with world-class CI/CD. Build, test, and deploy your code right from GitHub. Make code reviews, branch management, and issue triaging work the way you want.</p><h2>GitHub Pages 是什么？</h2><p>GitHub Pages 是由 GitHub 推出的一项静态页面托管服务，可用以展示项目、个人、组织等相关页面。</p><p>具体 Github Pages 此处不做过多赘述，请自行查阅资料</p><h2>简单使用</h2><p>借用 Actions 的强大可自定义性质，我们可以使用 GitHub Actions 实现对 GitHub Pages 的自动化部署。</p><h3>创建Git仓库并安装博客程序</h3><p>首先创建一个用来保存静态页面的仓库，这里我们使用的静态页面生成器是 Hexo 博客框架</p><p>⚠️注意：代码仓库里保存的是博客程序的源码，无需执行 <code>hexo g</code> 上传 <code>public</code> 文件夹</p><h3>创建 GitHub Actions 工作流文件</h3><p>在目录 <code>./github/workflows</code> 下创建 YAML 文件，文件名自取，如 <code>deploy.yml</code></p><p>内容填充为</p><pre><code class="language-yaml">name: Deploy to GitHub Pages
+on:
+  push:
+    branches:
+      - master # 推送此分支触发部署流程
+
+jobs:
+  deploy:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    steps:
+      # 检出代码
+      - uses: actions/checkout@master
+
+      # 设置 Nodejs
+      - uses: actions/setup-node@v2
+        with:
+          node-version: &#x27;14&#x27;
+      - run: npm i -g hexo-cli
+      - run: npm install
+      - run: cd themes/obsidian &amp;&amp; npm install
+      - run: hexo g
+
+      # 部署静态页面
+      - name: Deploy
+        uses: s0/git-publish-subdir-action@develop
+        env:
+          REPO: self
+          BRANCH: gh-pages # Github Pages 部署分支
+          FOLDER: public/
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+</code></pre><h3>提交代码至 GitHub 仓库</h3><p>GitHub 仓库会自动识别工作流文件，并且在你每次提交新的代码到 master 分支时开始执行一个 action
+至此，GitHub Actions 与 GitHub Pages 简单搭配使用已结束。</p>]]></content:encoded>
         </item>
         <item>
             <title><![CDATA[async / await 使用注意]]></title>
@@ -34,6 +277,135 @@
             <guid>async-await.html</guid>
             <pubDate>Tue, 28 May 2019 00:00:00 GMT</pubDate>
             <description><![CDATA[js 中的 async / await 有何作用？]]></description>
+            <content:encoded><![CDATA[<h2>js 中的 async / await 有何作用？</h2><p>有一种特殊的语法可以更舒适地与<code>Promise</code>一起使用，称为“<code>async/await</code>”。它非常容易理解和使用。</p><p>写过<code>JQuery</code>的同学对于其中的回调肯定印象深刻，在多层嵌套回调中，代码结构简直乱如麻。众多饱受其荼毒的受害者对此起了一个形象的名称：回调地狱。</p><p>为了解决此类问题，JS提供了两个新语法：<code>Promise</code> 和 <code>async / await</code>，其中 <code>async / await</code> 一般配套使用。 </p><h2>async / await 语法</h2><pre><code class="language-javascript">async function name([param[, param[, ...param]]]) {
+   statements
+}
+</code></pre><h3>参数</h3><ul><li><code>name</code>
+函数名</li><li><code>param</code>
+形参</li><li><code>statements</code>
+函数主体语句，其中 <code>await</code> 为可选使用</li></ul><h3>返回值</h3><p>返回一个<code>Promise</code>，它将由async函数返回的值来解决，或者被async函数抛出或未捕获到的异常拒绝。</p><h3>示例</h3><pre><code class="language-javascript">function resolveAfter2Seconds() {
+  return new Promise(resolve =&gt; {
+    setTimeout(() =&gt; {
+      resolve(&#x27;resolved&#x27;);
+    }, 2000);
+  });
+}
+
+async function asyncCall() {
+  console.log(&#x27;calling&#x27;);
+  const result = await resolveAfter2Seconds();
+  console.log(result);
+  // expected output: &quot;resolved&quot;
+}
+
+asyncCall();
+</code></pre><h2>使用注意</h2><h3><code>async</code> 函数总是返回 <code>Promise</code></h3><p>即使返回值只是一个<code>primitive</code>值，<code>async</code>函数也会通过<code>return</code>自动将返回值包装成一个<code>Promise</code>对象返回。
+因此，下面两组函数是等价的。</p><h4>正常 (Fulfill)</h4><pre><code class="language-javascript">// async函数
+async function foo () {
+  return &#x27;a&#x27;
+}
+
+// Promise
+function foo () {
+  return Promise.resolve(&#x27;a&#x27;)
+}
+</code></pre><h4>异常 (Reject)</h4><pre><code class="language-javascript">// async函数
+async function foo () {
+  throw new Error(&#x27;error&#x27;)
+}
+
+// Promise
+function foo () {
+  return Promise.reject(new Error(&#x27;error&#x27;))
+}
+</code></pre><h3><code>await</code>总是按顺序执行</h3><p>使用<code>async</code>函数之前，我们还得搞清楚它的运行机制。尤其是在执行顺序上，完全用同步的思维也许并不适用于<code>async</code>函数。</p><pre><code class="language-javascript">function asyncGet (x) {
+  return new Promise(resolve =&gt; setTimeout(() =&gt; {
+    console.log(&#x27;a&#x27;)
+    resolve(x)
+  }, 500))
+}
+
+async function test () {
+  console.log(&#x27;b&#x27;)
+  const x = 3 + 5
+  console.log(x)
+
+  const a = await asyncGet(1)
+  console.log(a)
+
+  const b = await asyncGet(2)
+  console.log(b)
+
+  console.log(&#x27;c&#x27;)  
+  return a + b
+}
+
+const now = Date.now()
+console.log(&#x27;d&#x27;)
+test().then(x =&gt; {
+  console.log(x)
+  console.log(`elapsed: ${Date.now() - now}`)
+})
+console.log(&#x27;f&#x27;)
+</code></pre><ol><li><code>async</code>函数和普通函数一样按顺序执行，同时，在执行到<code>await</code>语句时，返回一个<code>Promise</code>对象</li><li><code>await</code>可以理解为将<code>async</code>函数挂起，直到等待的<code>Promise</code>被<code>fulfill</code>或者<code>reject</code>，再继续执行之后的代码 </li><li><code>async</code>函数的返回值和普通<code>Promise</code>没有区别</li></ol><p>因此，上面代码输出应该是</p><pre><code class="language-text">d
+b
+8
+f
+a
+1
+a
+2
+c
+3
+elapsed: 1010
+</code></pre><blockquote><p>注意 d 和 f 中间的输出</p></blockquote><p>让我们再来看一个混合了<code>Promise</code>的版本。</p><pre><code class="language-javascript">function asyncGet (x) {
+  return new Promise(resolve =&gt; setTimeout(() =&gt; {
+    console.log(&#x27;a&#x27;)
+    resolve(x)
+  }, 500))
+}
+
+async function test () {
+  console.log(&#x27;b&#x27;)
+  const x = 3 + 5
+  console.log(x)
+
+  const [a, b] = await Promise.all([
+    asyncGet(1),
+    asyncGet(2)
+  ])
+
+  console.log(&#x27;c&#x27;)  
+  return a + b
+}
+
+const now = Date.now()
+console.log(&#x27;d&#x27;)
+test().then(x =&gt; {
+  console.log(x)
+  console.log(`elapsed: ${Date.now() - now}`)
+})
+console.log(&#x27;f&#x27;)
+</code></pre><p>输出结果</p><pre><code class="language-text">d
+b
+8
+f
+a
+a
+c
+3
+elapsed: 509
+</code></pre><p>注意到<code>elapsed</code>的差别了吗？这就是为什么我们说<code>await</code>总是顺序执行的。不同的<code>await</code>之间无法并行执行，想要真正的完全异步还得借助类似<code>Promise.all</code>这样的方法。</p><h3><code>async</code> 函数和 <code>callback</code></h3><p><code>await</code> 只能能影响直接包裹它的 <code>async</code> 函数。因此在 <code>callback</code> 函数中的 <code>await</code> 并不会挂起整个 <code>async</code> 函数的执行。</p><p>一种常见的错误</p><pre><code class="language-javascript">async function getAll (vals) {
+  return vals.map(v =&gt; await asyncGet(v))
+}
+</code></pre><p>这段代码有语法错误，<code>await</code> 并不在 <code>async</code> 函数内部。如果给 <code>map</code> 的 <code>callback</code> 加上 <code>async</code> 呢？</p><pre><code class="language-javascript">async function getAll (vals) {
+  return vals.map(async v =&gt; await asyncGet(v))
+}
+</code></pre><p>这段代码虽然能执行，但还有两个问题。</p><ol><li>返回一个<code>Promise</code>对象的数组，并不是我们期待的<code>value</code>数组</li><li>await只会暂停<code>map</code>的<code>callback</code>，因此<code>map</code>完成时，不能保证<code>asyncGet</code>也全部完成   </li></ol><p>正确的写法还得借助 <code>Promise.all</code></p><pre><code class="language-javascript">async function getAll (vals) {
+  return Promise.all(vals.map(v =&gt; asyncGet(v)))
+}
+</code></pre><h2>总结</h2><p>从上文我们可以看出，<code>Promise</code> 是 <code>async</code> 函数的基础，想要愉快的使用 <code>async</code> 函数，必须对 <code>Promise</code> 有比较深入的理解。甚至一些常见的任务，仅仅依靠 <code>async</code> 函数无法实现。
+希望大家看完本文后能对 <code>async</code> 函数有加更全面的认识，这样使用起来才会更加顺手。</p>]]></content:encoded>
         </item>
     </channel>
 </rss>

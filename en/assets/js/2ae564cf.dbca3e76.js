@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkblog_web=self.webpackChunkblog_web||[]).push([[2206],{6720:function(a){a.exports=JSON.parse('{"allTagsPath":"/en/blog/tags","slug":"/en/blog/tags/gitlab-ci","name":"Gitlab CI","count":1,"permalink":"/en/blog/tags/gitlab-ci"}')}}]);
