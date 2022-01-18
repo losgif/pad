@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://losgif.com/blog</id>
-    <title>LOSGIF Blog</title>
+    <title>LOSGIF's Website Blog</title>
     <updated>2021-01-01T00:00:00.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://losgif.com/blog"/>
-    <subtitle>LOSGIF Blog</subtitle>
+    <subtitle>LOSGIF's Website Blog</subtitle>
     <icon>https://losgif.com/img/favicon.ico</icon>
     <entry>
         <title type="html"><![CDATA[通过Gitlab CI构建Docker镜像]]></title>
