@@ -3,8 +3,8 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 
 /** @type {import('@docusaurus/types').DocusaurusConfig} */
 module.exports = {
-  title: 'LOSGIF',
-  tagline: '个人技术备忘录',
+  title: 'LOSGIF\'s Website',
+  tagline: '',
   url: 'https://losgif.com',
   baseUrl: '/',
   onBrokenLinks: 'warn',
